@@ -1444,6 +1444,8 @@ DialogDescriber* ScriptEngineContext::findDialogContainer(const QString& dialogN
     return 0;
 }
 
+#endif
+
 TableOfContents* ScriptEngineContext::tableOfContents() const
 {
     return m_tableOfContents;
@@ -1474,6 +1476,8 @@ void ScriptEngineContext::setCurrentBand(BandDesignIntf* currentBand)
 {
     m_currentBand = currentBand;
 }
+
+#ifdef HAVE_UI_LOADER
 
 QDialog* ScriptEngineContext::getDialog(const QString& dialogName)
 {
