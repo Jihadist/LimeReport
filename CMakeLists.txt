@@ -11,6 +11,7 @@ option(LIMEREPORT_STATIC "Build LimeReport as static library" OFF)
 option(LIMEREPORT_DEMO "Build LimeReport demos" OFF)
 option(ENABLE_DIALOG_DESIGNER "Enable dialog designer" OFF)
 option(HAVE_UI_LOADER "Enable ui loader" OFF)
+option(HAVE_SVG "Enable svg" OFF)
 option(USE_QT6 "Use Qt6" OFF)
 
 if (ENABLE_DIALOG_DESIGNER AND NOT HAVE_UI_LOADER)
@@ -25,12 +26,18 @@ endif(USE_QT6)
 
 find_package(
   Qt${QT_VERSION_MAJOR}
-  COMPONENTS Core Widgets Sql Network Xml Svg Qml PrintSupport REQUIRED)
+  COMPONENTS Core Widgets Sql Network Xml Qml PrintSupport REQUIRED)
 
 if(HAVE_UI_LOADER)
     find_package(
        Qt${QT_VERSION_MAJOR}
        COMPONENTS UiTools REQUIRED)
+ endif()
+
+ if(HAVE_SVG)
+    find_package(
+       Qt${QT_VERSION_MAJOR}
+       COMPONENTS Svg REQUIRED)
  endif()
 
 if(ENABLE_DIALOG_DESIGNER)
@@ -118,7 +125,6 @@ ${PROJECT_NAME}/items/lrlayoutmarker.cpp
 ${PROJECT_NAME}/items/lrpageeditor.cpp
 ${PROJECT_NAME}/items/lrshapeitem.cpp
 ${PROJECT_NAME}/items/lrsubitemparentpropitem.cpp
-${PROJECT_NAME}/items/lrsvgitem.cpp
 ${PROJECT_NAME}/items/lrtextitem.cpp
 ${PROJECT_NAME}/items/lrtextitemeditor.cpp
 ${PROJECT_NAME}/items/lrverticallayout.cpp
@@ -155,7 +161,6 @@ ${PROJECT_NAME}/objectinspector/editors/lrcoloreditor.cpp
 ${PROJECT_NAME}/objectinspector/editors/lrcomboboxeditor.cpp
 ${PROJECT_NAME}/objectinspector/editors/lrfonteditor.cpp
 ${PROJECT_NAME}/objectinspector/editors/lrimageeditor.cpp
-${PROJECT_NAME}/objectinspector/editors/lrsvgeditor.cpp
 ${PROJECT_NAME}/objectinspector/editors/lrtextitempropertyeditor.cpp
 ${PROJECT_NAME}/objectinspector/lrbasedesignobjectmodel.cpp
 ${PROJECT_NAME}/objectinspector/lrobjectinspectorwidget.cpp
@@ -177,7 +182,6 @@ ${PROJECT_NAME}/objectinspector/propertyItems/lrqrealpropitem.cpp
 ${PROJECT_NAME}/objectinspector/propertyItems/lrrectproptem.cpp
 ${PROJECT_NAME}/objectinspector/propertyItems/lrseriespropitem.cpp
 ${PROJECT_NAME}/objectinspector/propertyItems/lrstringpropitem.cpp
-${PROJECT_NAME}/objectinspector/propertyItems/lrsvgpropitem.cpp
 ${PROJECT_NAME}/objectsbrowser/lrobjectbrowser.cpp
 ${PROJECT_NAME}/scriptbrowser/lrscriptbrowser.cpp
 ${PROJECT_NAME}/scripteditor/lrcodeeditor.cpp
@@ -234,7 +238,6 @@ ${PROJECT_NAME}/items/lrlayoutmarker.h
 ${PROJECT_NAME}/items/lrpageeditor.h
 ${PROJECT_NAME}/items/lrshapeitem.h
 ${PROJECT_NAME}/items/lrsubitemparentpropitem.h
-${PROJECT_NAME}/items/lrsvgitem.h
 ${PROJECT_NAME}/items/lrtextitem.h
 ${PROJECT_NAME}/items/lrtextitemeditor.h
 ${PROJECT_NAME}/items/lrverticallayout.h
@@ -276,7 +279,6 @@ ${PROJECT_NAME}/objectinspector/editors/lrcoloreditor.h
 ${PROJECT_NAME}/objectinspector/editors/lrcomboboxeditor.h
 ${PROJECT_NAME}/objectinspector/editors/lrfonteditor.h
 ${PROJECT_NAME}/objectinspector/editors/lrimageeditor.h
-${PROJECT_NAME}/objectinspector/editors/lrsvgeditor.h
 ${PROJECT_NAME}/objectinspector/editors/lrtextitempropertyeditor.h
 ${PROJECT_NAME}/objectinspector/lrbasedesignobjectmodel.h
 ${PROJECT_NAME}/objectinspector/lrobjectinspectorwidget.h
@@ -298,7 +300,6 @@ ${PROJECT_NAME}/objectinspector/propertyItems/lrqrealpropitem.h
 ${PROJECT_NAME}/objectinspector/propertyItems/lrrectproptem.h
 ${PROJECT_NAME}/objectinspector/propertyItems/lrseriespropitem.h
 ${PROJECT_NAME}/objectinspector/propertyItems/lrstringpropitem.h
-${PROJECT_NAME}/objectinspector/propertyItems/lrsvgpropitem.h
 ${PROJECT_NAME}/objectsbrowser/lrobjectbrowser.h
 ${PROJECT_NAME}/scriptbrowser/lrscriptbrowser.h
 ${PROJECT_NAME}/scripteditor/lrcodeeditor.h
@@ -369,6 +370,21 @@ if(ENABLE_DIALOG_DESIGNER)
 
 endif()
 
+if(HAVE_SVG)
+    set(SVG_SOURCES
+        ${PROJECT_NAME}/items/lrsvgitem.h
+        ${PROJECT_NAME}/objectinspector/editors/lrsvgeditor.h
+        ${PROJECT_NAME}/objectinspector/propertyItems/lrsvgpropitem.h
+
+        ${PROJECT_NAME}/items/lrsvgitem.cpp
+        ${PROJECT_NAME}/objectinspector/editors/lrsvgeditor.cpp
+        ${PROJECT_NAME}/objectinspector/propertyItems/lrsvgpropitem.cpp)
+
+    message(STATUS "Svg found")
+    list( APPEND LIMEREPORT_SOURCES ${SVG_SOURCES} )
+
+endif()
+
 if (ENABLE_ZINT)
     list(APPEND LIMEREPORT_SOURCES ${PROJECT_NAME}/items/lrbarcodeitem.cpp)
     list(APPEND LIMEREPORT_SOURCES ${PROJECT_NAME}/items/lrbarcodeitem.h)
@@ -418,14 +434,19 @@ if(HAVE_UI_LOADER)
         Qt${QT_VERSION_MAJOR}::UiTools)
  endif()
 
+ if(HAVE_SVG)
+    target_compile_definitions( ${PROJECT_NAME} PRIVATE -DHAVE_SVG)
+    target_link_libraries( ${PROJECT_NAME} PUBLIC
+        Qt${QT_VERSION_MAJOR}::Svg)
+ endif()
+
 target_link_libraries( ${PROJECT_NAME} PUBLIC
-	Qt${QT_VERSION_MAJOR}::Core
-	Qt${QT_VERSION_MAJOR}::Widgets
-	Qt${QT_VERSION_MAJOR}::Qml
-	Qt${QT_VERSION_MAJOR}::Xml
-	Qt${QT_VERSION_MAJOR}::Sql
-	Qt${QT_VERSION_MAJOR}::PrintSupport
-	Qt${QT_VERSION_MAJOR}::Svg)
+        Qt${QT_VERSION_MAJOR}::Core
+        Qt${QT_VERSION_MAJOR}::Widgets
+        Qt${QT_VERSION_MAJOR}::Qml
+        Qt${QT_VERSION_MAJOR}::Xml
+        Qt${QT_VERSION_MAJOR}::Sql
+        Qt${QT_VERSION_MAJOR}::PrintSupport)
 
 if(ENABLE_DIALOG_DESIGNER)
     target_compile_definitions(${PROJECT_NAME} PUBLIC -DHAVE_QTDESIGNER_INTEGRATION)
